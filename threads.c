@@ -87,7 +87,13 @@ int main(int argc, char *argv[]){
 
 	/* Multiplicando as Matrizes */ 
 
-	lin_m = n1; // Quantidade de linhas da matriz m1
+	//Defining Threads
+    int quantidade_threads = atoi(argv[2]);
+    pthread_t threads[quantidade_threads];
+    int status, i;
+    void *thread_return;
+
+    lin_m = n1; // Quantidade de linhas da matriz m1
 	col_m = m2; // Quantidade de colunas da matriz m2
 
 	int matriz_resultado[lin_m][col_m];
@@ -95,7 +101,7 @@ int main(int argc, char *argv[]){
 	printf("\nMontando matriz resultado...\n");
 	clock_t begin = clock();
 
-	for(i=0; i<lin_m; i++){
+    for(i=0; i<lin_m; i++){
 		for(j=0; j<col_m; j++){
 			matriz_resultado[i][j] = 0;
 			for(k=0; k<m1; k++){
@@ -103,36 +109,15 @@ int main(int argc, char *argv[]){
 			}
 		}
 	}
-
-	clock_t end = clock();
-	double time_spent = (double)(end - begin) / (CLOCKS_PER_SEC/1000);
-	printf("\nTempo gasto para execução foi de %f ms\n", time_spent);
-
-	printf("\nMatriz Resultado:\n\n");
-	for(i=0; i<lin_m; i++){
-		for(j=0; j<col_m; j++){
-			printf("%d;", matriz_resultado[i][j]);
-		}
-		printf("\n");
-	}
+    
+    // for(i=0; i<quantidade_threads; i++){
+        
+        
+    // }
 
 
-	/* Escrevendo o Resultado da Multiplicacao */
-
-	file3 = fopen("resultado.csv", "w");
-	fprintf(file3, "%d %d\n", lin_m, col_m);
-	for(int i=0; i<n1; i++){
-		for(int j=0; j<m1; j++){
-			fprintf(file3, "c%d", i+1);
-			fprintf(file3, "%d %d", j+1, matriz_resultado[i][j]);
-			fprintf(file3, "\n");
-		}
-		
-	}
-
-	fprintf(file3, "\nTempo gasto para execução foi de %f ms", time_spent);
-	fclose(file3); 
-
+    
+    
 
 	return 0;
 }
