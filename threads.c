@@ -8,8 +8,12 @@
 
 
 // Variaveis globais
-int numero_threads, lin_m, col_m;
-int **matriz_resultado_global;
+int numero_threads, lin_m, col_m, lin_aux=0, col_aux=0;   
+// 0 1 2 3 4[0,4] 4/5=0 resto 4    12/5=2 resto 2 [2,2]  [4,2] = 22 elemento
+int elemento_atual = 1;
+int P;
+
+int **matriz_resultado_global, **matriz_1, **matriz_2;
 
 // Funcao para imprimir matriz global que foi alocada dinamicamente
 void* imprimir_matriz_global(){
@@ -25,14 +29,54 @@ void* imprimir_matriz_global(){
 
 // Funcao principal das Threads
 void* multiplica_matrizes(void* indice){
+  
+  // Esse cara vai ser global provavelmente? não ter que ficar calculando sempre.
+  int elementos_total = lin_m * col_m;
+
+  // Quantos eu vou calcular?
+  for(int i=1; i<=P; i++){
+
+    // Não passar da quantidade que é pra calcular
+    if(elemento_atual <= elementos_total){
+      // 3X3
+      //Calcular indice do elemento: 4(ele)/3(P) = [1 (divisao inteira),1 (resto)] 
+      
+      // Calcula matriz
+      matriz_resultado_global[lin_aux][col_aux] += matriz_1[i][k] * matriz_2[k][j];
+
+      // Incrementa
+      elemento_atual += 1;
+      col_aux += 1;
+
+      // Se chegar no limite de colunas, pula uma linha e zera as colunas
+      if(col_aux + 1 > col_m){ 
+        // + 1 pois começa com zero, então fica: [0 1 2] Colunas, se COL_M = 3 Colunas, a gente soma + 1 pra conta bater certinha com 3 colunas
+        lin_aux += 1;
+        col_aux = 0;
+
+      }
+
+    }else {
+        // SE não tem mais elemento pra calcular é xau
+        break;
+      }
+  
+
+
+  }
+  // processo 1 = #0     0,0 - 0,P   0 até ((indice+1)*P) -1
+  // processo 2 = #1                 (indice*P) até ((indice+1)*P) -1
+  // ((indice+1) *P) -1 pode estourar o total de elementos, verificar
+
 	sleep(1);
 	printf("OII");
+  fflush(stdout);
 	printf("NUMERO THREADS = %d\n", numero_threads);
+  fflush(stdout);
 	sleep(5);
 	//pthread_exit(NULL);
 
 }
-
 
 int main(int argc, char *argv[]){
 
@@ -57,7 +101,11 @@ int main(int argc, char *argv[]){
 	
 	// Obtendo as dimensoes da matriz
 	fscanf(file1, "%d;%d;", &n1, &m1);
-	int matriz_1[n1][m1];
+	//int matriz_1[n1][m1];
+ 	matriz_1 = malloc(n1 * sizeof(int*));
+	for(i=0; i<m1; i++){
+		matriz_1[i] = malloc(m1 * sizeof(int));
+	}
 
 	for(i=0; i<n1; i++){
 		for(j=0; j<m1; j++){
@@ -89,7 +137,11 @@ int main(int argc, char *argv[]){
 	
 	// Obtendo as dimensoes da matriz
 	fscanf(file2, "%d;%d;", &n2, &m2);
-	int matriz_2[n2][m2];
+	//int matriz_2[n2][m2];
+  matriz_2 = malloc(n2 * sizeof(int*));
+	for(i=0; i<m2; i++){
+		matriz_2[i] = malloc(m2 * sizeof(int));
+	}
 
 	for(i=0; i<n2; i++){
 		for(j=0; j<m2; j++){
@@ -118,10 +170,10 @@ int main(int argc, char *argv[]){
 	/* Multiplicando as Matrizes */ 
 
 	//Defining Threads
-    int P = atoi(argv[3]);
-    int status;
-    void *thread_return;
-    lin_m = n1; // Quantidade de linhas da matriz m1
+  P = atoi(argv[3]);
+  int status;
+  void *thread_return;
+  lin_m = n1; // Quantidade de linhas da matriz m1
 	col_m = m2; // Quantidade de colunas da matriz m2
 	int matriz_resultado[lin_m][col_m];
 
@@ -150,7 +202,6 @@ int main(int argc, char *argv[]){
 	imprimir_matriz_global();
 
 
-
 	// Fazendo o calculo da quantidade de threads necessarias
 	int quantidade_threads = (lin_m * col_m)/P; 
 	pthread_t threads[quantidade_threads];
@@ -162,7 +213,8 @@ int main(int argc, char *argv[]){
 
 	for(i=0; i<quantidade_threads; i++){
 		printf("Processo (PID=%d) criando thread #%d\n", getpid(), i);
-		status = pthread_create(&threads[i], NULL, multiplica_matrizes, (void *)(size_t)i); //
+		status = pthread_create(&threads[i], NULL, multiplica_matrizes, (void *)(size_t)i);
+    
 
 		if(status != 0){
 			printf("Erro na criação da thread!\n");
