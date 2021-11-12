@@ -10,7 +10,7 @@
 // Variaveis globais
 int numero_threads, lin_m, col_m, lin_aux=0, col_aux=0;   
 // 0 1 2 3 4[0,4] 4/5=0 resto 4    12/5=2 resto 2 [2,2]  [4,2] = 22 elemento
-int elemento_atual = 1;
+int elemento_atual = 0;
 int P;
 
 int **matriz_resultado_global, **matriz_1, **matriz_2;
@@ -27,57 +27,79 @@ void* imprimir_matriz_global(){
 	}
 }
 
+
+void* multiplica_matrizes2(void* i){
+
+	int indice = (int)(size_t)i; 
+	fflush(stdout);
+	printf("INDICE = %d\n", indice/P);
+	//((indice+1)*P) -1
+	int linha = indice/P;
+	int coluna = indice%P;
+
+	for(int contador=0; contador<P; contador++){
+		for(int k=0; k<col_m; k++){ 
+	      	matriz_resultado_global[linha][coluna] += matriz_1[linha][k] * matriz_2[k][coluna];
+	  }
+	  fflush(stdout);
+		printf("Matriz = = %d\n", matriz_resultado_global[linha][coluna] );
+	  coluna += 1;//prox elemento
+
+	  if(coluna >= col_m){
+	  	linha+=1;
+	  }
+	  //elemento_atual+=1;
+	}
+	/*else{
+		//break;
+		elemento_atual = 0;*/
+		pthread_exit(NULL);
+
+  
+}
+
 // Funcao principal das Threads
 // Indice thread 1 = #0, thread 2 = #1.....
 // P = 3, thread 1 vai calcular 1, 2 e 3 elementos 3
 void* multiplica_matrizes(void* indice){
-	//sleep(2);
+	sleep(2); //indice *
 	fflush(stdout);
 	
 	printf("Thread #%d começando valor P=%d...\n", (int)(size_t)indice, P);
-	//fflush(stdout);
-
   int elementos_total = lin_m * col_m;
 
  // Multiplicar P elementos da matriz resultado
-  for(int i=0; i<P; i++){
+  for(int i=0; i<P; i++){ 
 
     // Não passar da quantidade que é pra calcular
-    if(elemento_atual <= elementos_total){
+    if(elemento_atual < P){
 
       // Calcula matriz
       matriz_resultado_global[lin_aux][col_aux] = 0;
+      fflush(stdout);
+      printf("LINHA=%d e COLUNA=%d\n", lin_aux, col_aux	);
 
       for(int k=0; k<col_m; k++){
       	matriz_resultado_global[lin_aux][col_aux] += matriz_1[lin_aux][k] * matriz_2[k][col_aux];
-      	fflush(stdout);
-      	printf("%d ", matriz_resultado_global[lin_aux][col_aux]);
       }
-      //fflush(stdout);
-      //printf("\n");
 
       // Incrementa
       elemento_atual += 1;
       col_aux += 1;
-      lin_aux += 1;
 
       // Se chegar no limite de colunas, pula uma linha e zera as colunas
-      if((col_aux + 1) >= col_m){ 
-        // + 1 pois começa com zero, então fica: [0 1 2] Colunas, se COL_M = 3 Colunas, a gente soma + 1 pra conta bater certinha com 3 colunas
-        //lin_aux += 1;
+      if((col_aux) >= col_m){ 
+        lin_aux += 1;
         col_aux = 0;
-      }
-      if((lin_aux + 1) >= lin_m){
-      	lin_aux = 0;
-      }
+      }      
 
     }else {
     	printf("Não tem mais elementos para calcular\n");
-        // SE não tem mais elemento pra calcular é xau
         break;
     }
 
   }
+  elemento_atual = 0;
   //fflush(stdout);
   printf("Thread SAINDO....\n");
   pthread_exit(NULL);
@@ -221,7 +243,7 @@ int main(int argc, char *argv[]){
 
 	for(i=0; i<quantidade_threads; i++){
 		printf("Processo (PID=%d) criando thread #%d\n", getpid(), i);
-		status = pthread_create(&threads[i], NULL, multiplica_matrizes, (void *)(size_t)i);
+		status = pthread_create(&threads[i], NULL, multiplica_matrizes2, (void *)(size_t)i);
     
 
 		if(status != 0){
@@ -245,7 +267,9 @@ int main(int argc, char *argv[]){
 	}
 	free(matriz_resultado_global);
 	lin_aux=0;
-	col_aux=0; 
+	col_aux=0;
+    
+    
 
 	return 0;
 }
