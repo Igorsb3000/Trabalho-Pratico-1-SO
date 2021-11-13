@@ -4,7 +4,40 @@
 #include <string.h>
 #include <time.h>
 
-int main(int argc, char *argv[]){
+pthread_t *threads;
+
+
+void* multiplicando_matriz(){
+	
+}
+
+int main(int argc, char *argv[]){	
+
+	// Alocar array para minha thread
+    int quantidade_threads = atoi(argv[3]);
+	printf("quantidade de threads: %d\n", quantidade_threads);
+
+	threads = malloc(quantidade_threads * sizeof(int));
+	printf("threads: %ln\n", threads);
+	
+	for (int variavel = 0; variavel < quantidade_threads; variavel++)
+	{
+		threads[variavel] = 10;
+		printf("for loop: threads[%d]: %ln\n", variavel, threads);
+	}
+
+	printf("threads: %ln\n", threads);
+	// calculate size in bytes
+	int arraySize = sizeof(threads);
+	int intSize = sizeof(threads[0]);
+
+	// length
+	int length = arraySize / intSize;
+
+	printf("Length of array = %d \n", length);
+	
+
+	sleep(10);
 
 	int n1, m1, n2, m2, lin_m, col_m, i, j, k;
 	FILE *file1, *file2, *file3;
@@ -47,7 +80,6 @@ int main(int argc, char *argv[]){
 	}
 
 
-
 	/* Lendo Matriz 2 */
 
 	// Abrindo os arquivos para leitura das matrizes
@@ -79,60 +111,62 @@ int main(int argc, char *argv[]){
 	}
 
 	// Verificando se a multiplicacao das matriz m1 e m2 eh possivel
-	if(m1 != n2){
+	if(n1 != m2){
 		printf("\nNão é possivel multiplicar as matrizes m1 e m2!\n");
 		return 1;
 	}
 
 
-	/* Multiplicando as Matrizes */ 
+	/* Multiplicando as Matrizes - THREADS*/ 
 
-	lin_m = n1; // Quantidade de linhas da matriz m1
+	//Defining Threads
+    int status;
+    void *thread_return;
+
+    lin_m = n1; // Quantidade de linhas da matriz m1
 	col_m = m2; // Quantidade de colunas da matriz m2
+
+	/* 
+
+	Professor sobre o trabalho da primeira unidade, tava fazendo aqui a parte das threads e eu passo os dois arquivos na linha de comando e o valor de P.
+	Só que o tamanho da minha matriz_resultado eu só consigo saber in run time, como que danado eu vou instanciar o tamanho do meu array da matriz_resultado se eu só consigo saber in run time?
+	tentei fazer usando maloc, fiz alguns testes, vou deixar código abaixo, mas não deu certo...
+
+
+	Para cada P elementos da matriz resultado uma thread deve ser criada. 
+
+	2x2 = 4 elementos. -> P = 2 => 4/2 = 2 threads
+	10x10 = 100 elementos. -> P = 2 => 100/2 = 50 threads
+
+	P => quantidade de vezes que vai executar a função dentro da Thread
+	*/
 
 	int matriz_resultado[lin_m][col_m];
 
 	printf("\nMontando matriz resultado...\n");
 	clock_t begin = clock();
 
-	for(i=0; i<lin_m; i++){
+    for(i=0; i<lin_m; i++){
 		for(j=0; j<col_m; j++){
 			matriz_resultado[i][j] = 0;
-			for(k=0; k<m1; k++){
+			for(k=0; k<m1; k++){ // Não entendi isso aqui
 				matriz_resultado[i][j] += matriz_1[i][k] * matriz_2[k][j];
 			}
 		}
 	}
-
+    
 	clock_t end = clock();
 	double time_spent = (double)(end - begin) / (CLOCKS_PER_SEC/1000);
 	printf("\nTempo gasto para execução foi de %f ms\n", time_spent);
 
-	printf("\nMatriz Resultado:\n\n");
-	for(i=0; i<lin_m; i++){
-		for(j=0; j<col_m; j++){
-			printf("%d;", matriz_resultado[i][j]);
-		}
-		printf("\n");
-	}
+    // for(i=0; i<quantidade_threads; i++){
+        
+        
+    // }
 
 
-	/* Escrevendo o Resultado da Multiplicacao */
-
-	file3 = fopen("resultado_sequencial.csv", "w");
-	fprintf(file3, "%d %d\n", lin_m, col_m);
-	for(int i=0; i<n1; i++){
-		for(int j=0; j<m1; j++){
-			fprintf(file3, "c%d", i+1);
-			fprintf(file3, "%d %d", j+1, matriz_resultado[i][j]);
-			fprintf(file3, "\n");
-		}
-		
-	}
-
-	fprintf(file3, "%fms", time_spent);
-	fclose(file3); 
-
+    
+    
 
 	return 0;
 }
