@@ -121,13 +121,12 @@ int main(int argc, char *argv[]){
 
 	file3 = fopen("resultado_sequencial.csv", "w");
 	fprintf(file3, "%d %d\n", lin_m, col_m);
-	for(int i=0; i<n1; i++){
-		for(int j=0; j<m1; j++){
+	for(int i=0; i<lin_m; i++){
+		for(int j=0; j<col_m; j++){
 			fprintf(file3, "c%d", i+1);
 			fprintf(file3, "%d %d", j+1, matriz_resultado[i][j]);
 			fprintf(file3, "\n");
 		}
-		
 	}
 
 	fprintf(file3, "%fms", time_spent);
