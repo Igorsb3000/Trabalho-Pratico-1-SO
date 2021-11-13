@@ -79,7 +79,7 @@ int main(int argc, char *argv[]){
 	}
 
 	// Verificando se a multiplicacao das matriz m1 e m2 eh possivel
-	if(n1 != m2){
+	if(m1 != n2){
 		printf("\nNão é possivel multiplicar as matrizes m1 e m2!\n");
 		return 1;
 	}
