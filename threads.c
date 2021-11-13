@@ -6,14 +6,14 @@
 #include <unistd.h>
 #include <pthread.h>
 
+/*
+*	Autores: Igor Silva e Wesley Gurgel
+*/
 
 // Variaveis globais
-int numero_threads, lin_m, col_m, lin_aux=0, col_aux=0;   
-// 0 1 2 3 4[0,4] 4/5=0 resto 4    12/5=2 resto 2 [2,2]  [4,2] = 22 elemento
-int elemento_atual = 0;
-int P;
-
+int numero_threads, lin_m, col_m, lin_aux=0, col_aux=0, P;   
 int **matriz_resultado_global, **matriz_1, **matriz_2;
+
 
 // Funcao para imprimir matriz global que foi alocada dinamicamente
 void* imprimir_matriz_global(){
@@ -21,92 +21,50 @@ void* imprimir_matriz_global(){
 
 	for(int i=0; i<lin_m; i++){
 		for(int j=0; j<col_m; j++){
-			printf("%d ", matriz_resultado_global[i][j]);
+			printf("%d;", matriz_resultado_global[i][j]);
 		}
 		printf("\n");
 	}
 }
 
 
-void* multiplica_matrizes2(void* i){
+// Funao para multiplicar P elementos da matriz resultado para cada Thread
+void* multiplica_matrizes(void* i){
+	FILE *file;
+	char *nome_arquivo = malloc(30 * sizeof(char));
+	sprintf(nome_arquivo, "resultado_thread_%d.csv", (int)(size_t)i);
+	file = fopen(nome_arquivo, "w");
+	fprintf(file, "%d;%d;\n", lin_m, col_m);
 
-	int indice = (int)(size_t)i; 
-	fflush(stdout);
-	printf("INDICE = %d\n", indice/P);
-	//((indice+1)*P) -1
-	int linha = indice/P;
-	int coluna = indice%P;
+	int linha, coluna, e, indice = (int)(size_t)i; 
+	//int elemento_inicial = indice*P;
 
-	for(int contador=0; contador<P; contador++){
-		for(int k=0; k<col_m; k++){ 
+	for(e=indice*P; e<((indice+1)*P); e++){
+		int total_elementos = (lin_m*col_m);
+
+		if(e < total_elementos){
+			linha = e/lin_m;
+			coluna = e%col_m;
+
+			matriz_resultado_global[linha][coluna] = 0;
+			// col_aux == m2 (quant de colunas da matriz 2)
+			for(int k=0; k<col_aux; k++){  
 	      	matriz_resultado_global[linha][coluna] += matriz_1[linha][k] * matriz_2[k][coluna];
-	  }
-	  fflush(stdout);
-		printf("Matriz = = %d\n", matriz_resultado_global[linha][coluna] );
-	  coluna += 1;//prox elemento
 
-	  if(coluna >= col_m){
-	  	linha+=1;
-	  }
-	  //elemento_atual+=1;
+	  	}
+	  	fprintf(file, "%d;", matriz_resultado_global[linha][coluna]);
+
+		}else{
+			// Não tem mais elementos para calcular
+			break;
+		}
 	}
-	/*else{
-		//break;
-		elemento_atual = 0;*/
-		pthread_exit(NULL);
-
-  
+	fclose(file);	
+	free(nome_arquivo);
+	pthread_exit(NULL);
 }
 
-// Funcao principal das Threads
-// Indice thread 1 = #0, thread 2 = #1.....
-// P = 3, thread 1 vai calcular 1, 2 e 3 elementos 3
-void* multiplica_matrizes(void* indice){
-	sleep(2); //indice *
-	fflush(stdout);
-	
-	printf("Thread #%d começando valor P=%d...\n", (int)(size_t)indice, P);
-  int elementos_total = lin_m * col_m;
 
- // Multiplicar P elementos da matriz resultado
-  for(int i=0; i<P; i++){ 
-
-    // Não passar da quantidade que é pra calcular
-    if(elemento_atual < P){
-
-      // Calcula matriz
-      matriz_resultado_global[lin_aux][col_aux] = 0;
-      fflush(stdout);
-      printf("LINHA=%d e COLUNA=%d\n", lin_aux, col_aux	);
-
-      for(int k=0; k<col_m; k++){
-      	matriz_resultado_global[lin_aux][col_aux] += matriz_1[lin_aux][k] * matriz_2[k][col_aux];
-      }
-
-      // Incrementa
-      elemento_atual += 1;
-      col_aux += 1;
-
-      // Se chegar no limite de colunas, pula uma linha e zera as colunas
-      if((col_aux) >= col_m){ 
-        lin_aux += 1;
-        col_aux = 0;
-      }      
-
-    }else {
-    	printf("Não tem mais elementos para calcular\n");
-        break;
-    }
-
-  }
-  elemento_atual = 0;
-  //fflush(stdout);
-  printf("Thread SAINDO....\n");
-  pthread_exit(NULL);
-  // processo 1 = #0     0,0 - 0,P   0 até ((indice+1)*P) -1
-  // processo 2 = #1                 (indice*P) até ((indice+1)*P) -1
-  // ((indice+1) *P) -1 pode estourar o total de elementos, verificar
-}
 
 int main(int argc, char *argv[]){
 
@@ -191,10 +149,11 @@ int main(int argc, char *argv[]){
 	}
 
 	// Verificando se a multiplicacao das matriz m1 e m2 eh possivel
-	if(n1 != m2){
+	if(m1 != n2){
 		printf("\nNão é possivel multiplicar as matrizes m1 e m2!\n");
 		return 1;
 	}
+	col_aux = n2;
 
 
 	/* Multiplicando as Matrizes */ 
@@ -213,62 +172,61 @@ int main(int argc, char *argv[]){
 		matriz_resultado_global[i] = malloc(col_m * sizeof(int));
 	}
 
-	// Multiplicando as matrizes e testando se a matriz global esta funcionando
-	for(i=0; i<lin_m; i++){
-		for(j=0; j<col_m; j++){
-			matriz_resultado[i][j] = 0;
-			for(k=0; k<m1; k++){
-				matriz_resultado[i][j] += matriz_1[i][k] * matriz_2[k][j];
-			}
-		}
-	}
-
-	/*for(int i=0; i<lin_m; i++){
-		for(int j=0; j<col_m; j++){
-			matriz_resultado_global[i][j] = matriz_resultado[i][j];
-		}
-	}*/
-
-	
-
 
 	// Fazendo o calculo da quantidade de threads necessarias
 	int quantidade_threads = (lin_m * col_m)/P; 
+	if((lin_m*col_m)%P != 0){
+		fflush(stdout);
+		printf("numero par.. criando outra thread\n");
+		quantidade_threads += 1;
+	}
+
 	pthread_t threads[quantidade_threads];
-
-
-	//clock_t begin = clock();
 	numero_threads = quantidade_threads;
-	printf("THREADS = %d\n", numero_threads);
+
+	FILE *file;
+	double time_spent; 
+	char *nome_arquivo = malloc(30 * sizeof(char));
 
 	for(i=0; i<quantidade_threads; i++){
 		printf("Processo (PID=%d) criando thread #%d\n", getpid(), i);
-		status = pthread_create(&threads[i], NULL, multiplica_matrizes2, (void *)(size_t)i);
-    
+		// Tempo inicial de execucao da thread
+		clock_t begin = clock();
+		status = pthread_create(&threads[i], NULL, multiplica_matrizes, (void *)(size_t)i);
+		printf("Esperando Thread #%d finalizar...\n", i);
+		pthread_join(threads[i], &thread_return);
+		printf("Thread #%d finalizada\n", i);
+		// Tempo final de execucao da thread
+    clock_t end = clock();
+		time_spent = (double)(end - begin) / (CLOCKS_PER_SEC/1000);
+		printf("\nTempo gasto thread #%d para execução foi de %f ms\n", i, time_spent);
 
+		
 		if(status != 0){
 			printf("Erro na criação da thread!\n");
 			return 1;
 		}
-	}
-	for(i=0; i<quantidade_threads; i++){
-		printf("Esperando THread #%d finalizar...\n", i);
-		pthread_join(threads[i], &thread_return);
-		printf("Thread #%d finalizada\n", i);
-	}
 
+		//Escrevendo o tempo no arquivo
+		sprintf(nome_arquivo, "resultado_thread_%d.csv", i);
+		file = fopen(nome_arquivo, "a");
+		fprintf(file, "\n");
+		fprintf(file, "%fms;", time_spent);
+
+		fclose(file);
+	}
+	
+	// Imprimindo Matriz Resultado GLobal
+	printf("\nMatriz Resultado:\n");
 	imprimir_matriz_global();
 
 
-	printf("Liberando espaco da matriz matriz resultado\n");
-	// Liberando espeço alocado dinamicamente da matriz global
+	// Liberando espacos da memoria alocada dinamicamente
   for(i=0; i<col_m; i++){
 		free(matriz_resultado_global[i]);
 	}
 	free(matriz_resultado_global);
-	lin_aux=0;
-	col_aux=0;
-    
+	free(nome_arquivo);
     
 
 	return 0;
