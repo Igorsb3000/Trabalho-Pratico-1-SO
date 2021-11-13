@@ -79,7 +79,7 @@ int main(int argc, char *argv[]){
 	}
 
 	// Verificando se a multiplicacao das matriz m1 e m2 eh possivel
-	if(n1 != m2){
+	if(m1 != n2){
 		printf("\nNão é possivel multiplicar as matrizes m1 e m2!\n");
 		return 1;
 	}
@@ -119,7 +119,7 @@ int main(int argc, char *argv[]){
 
 	/* Escrevendo o Resultado da Multiplicacao */
 
-	file3 = fopen("resultado.csv", "w");
+	file3 = fopen("resultado_sequencial.csv", "w");
 	fprintf(file3, "%d %d\n", lin_m, col_m);
 	for(int i=0; i<n1; i++){
 		for(int j=0; j<m1; j++){
@@ -130,7 +130,7 @@ int main(int argc, char *argv[]){
 		
 	}
 
-	fprintf(file3, "\nTempo gasto para execução foi de %f ms", time_spent);
+	fprintf(file3, "%fms", time_spent);
 	fclose(file3); 
 
 
