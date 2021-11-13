@@ -13,6 +13,8 @@
 // Variaveis globais
 int numero_threads, lin_m, col_m, lin_aux=0, col_aux=0, P;   
 int **matriz_resultado_global, **matriz_1, **matriz_2;
+clock_t begin, end;
+double time_spent;
 
 
 // Funcao para imprimir matriz global que foi alocada dinamicamente
@@ -59,6 +61,11 @@ void* multiplica_matrizes(void* i){
 			break;
 		}
 	}
+
+	// Tempo final sa execucao da thread
+	end = clock();
+	time_spent = (double)(end - begin) / (CLOCKS_PER_SEC/1000);
+	fprintf(file, "\n%fms;", time_spent);
 	fclose(file);	
 	free(nome_arquivo);
 	pthread_exit(NULL);
@@ -188,32 +195,23 @@ int main(int argc, char *argv[]){
 	double time_spent; 
 	char *nome_arquivo = malloc(30 * sizeof(char));
 
+	// Tempo inicial de execucao da thread
+	begin = clock();
+	
 	for(i=0; i<quantidade_threads; i++){
 		printf("Processo (PID=%d) criando thread #%d\n", getpid(), i);
-		// Tempo inicial de execucao da thread
-		clock_t begin = clock();
 		status = pthread_create(&threads[i], NULL, multiplica_matrizes, (void *)(size_t)i);
-		printf("Esperando Thread #%d finalizar...\n", i);
-		pthread_join(threads[i], &thread_return);
-		printf("Thread #%d finalizada\n", i);
-		// Tempo final de execucao da thread
-    clock_t end = clock();
-		time_spent = (double)(end - begin) / (CLOCKS_PER_SEC/1000);
-		printf("\nTempo gasto thread #%d para execução foi de %f ms\n", i, time_spent);
-
 		
 		if(status != 0){
 			printf("Erro na criação da thread!\n");
 			return 1;
 		}
+	}
 
-		//Escrevendo o tempo no arquivo
-		sprintf(nome_arquivo, "resultado_thread_%d.csv", i);
-		file = fopen(nome_arquivo, "a");
-		fprintf(file, "\n");
-		fprintf(file, "%fms;", time_spent);
-
-		fclose(file);
+	for(i=0; i<quantidade_threads; i++){
+		printf("Esperando Thread #%d finalizar...\n", i);
+		pthread_join(threads[i], &thread_return);
+		printf("Thread #%d finalizada\n", i);
 	}
 	
 	// Imprimindo Matriz Resultado GLobal
