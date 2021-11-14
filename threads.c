@@ -74,8 +74,7 @@ void *multiplica_matrizes(void *i)
 	time_total += time_spent;
 
 	printf("Time total = %f | time spent = %f\n", time_total, time_spent);
-	// printf("Time spent = %f ms\n",time_spent);
-	fprintf(file, "\nTempo de execução: %f ms;", time_spent);
+	fprintf(file, "\n%fms;", time_spent);
 	fclose(file);
 	free(nome_arquivo);
 	pthread_exit(NULL);
