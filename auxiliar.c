@@ -4,36 +4,9 @@
 #include <string.h>
 #include <time.h>
 
-// Será utilizado na multiplicação das matrizes
 /*
-typedef struct matriz {
-	int **mat_data;
-	int linhas;
-	int colunas;
-} matriz;
-
-
-
-matriz* create_mat(int n_linhas, int n_colunas, int mat_raw[n_linhas][n_colunas]){
-	matriz* MAT;
-	MAT = malloc(sizeof(struct matriz)*1); // Alocando dinamicamente espaço para 1 Matriz
-
-	MAT->mat_data=malloc(sizeof(int*)*n_linhas);
-
-	for(int i=0; i<n_linhas; i++){
-		MAT->mat_data[i] = malloc(sizeof(int)*n_colunas);
-	}
-
-	for(int i=0; i<n_linhas; i++){
-		for(int j=0; j<n_colunas; j++){
-			MAT->mat_data[i][j] = mat_raw[i][j];
-		}
-	}
-	MAT->linhas = n_linhas;
-	MAT->colunas = n_colunas;
-
-	return MAT;
-}*/
+*	Autores: Igor Silva e Wesley Gurgel
+*/
 
 int main(int argc, char *argv[]){
 	FILE *file1, *file2;

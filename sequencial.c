@@ -3,9 +3,15 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <sys/time.h>
+
+/*
+*	Autores: Igor Silva e Wesley Gurgel
+*/
 
 int main(int argc, char *argv[]){
-
+	struct timeval begin, end;
+	double time_spent;
 	int n1, m1, n2, m2, lin_m, col_m, i, j, k;
 	FILE *file1, *file2, *file3;
 
@@ -93,7 +99,8 @@ int main(int argc, char *argv[]){
 	int matriz_resultado[lin_m][col_m];
 
 	printf("\nMontando matriz resultado...\n");
-	clock_t begin = clock();
+	// Tempo inicial de execucao da thread
+    gettimeofday(&begin, NULL);
 
 	for(i=0; i<lin_m; i++){
 		for(j=0; j<col_m; j++){
@@ -104,8 +111,10 @@ int main(int argc, char *argv[]){
 		}
 	}
 
-	clock_t end = clock();
-	double time_spent = (double)(end - begin) / (CLOCKS_PER_SEC/1000);
+	// Tempo final da execucao da thread
+    gettimeofday(&end, NULL);
+    time_spent = (end.tv_sec - begin.tv_sec) * 1000.0;
+    time_spent += (end.tv_usec - begin.tv_usec) / 1000.0;
 	printf("\nTempo gasto para execução foi de %f ms\n", time_spent);
 
 	printf("\nMatriz Resultado:\n\n");
@@ -129,7 +138,7 @@ int main(int argc, char *argv[]){
 		}
 	}
 
-	fprintf(file3, "%fms", time_spent);
+	fprintf(file3, "%fms;", time_spent);
 	fclose(file3); 
 
 
