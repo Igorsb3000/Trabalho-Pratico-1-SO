@@ -17,6 +17,7 @@ int numero_threads, lin_m, col_m, lin_aux=0, col_aux=0, P;
 int **matriz_resultado_global, **matriz_1, **matriz_2;
 struct timeval begin, end;
 double time_spent;
+double time_total = 0.0;
 
 
 // Funcao para imprimir matriz global que foi alocada dinamicamente
@@ -63,6 +64,9 @@ void* multiplica_matrizes(void* i){
     gettimeofday(&end, NULL);
     time_spent = (end.tv_sec - begin.tv_sec) * 1000.0;
     time_spent += (end.tv_usec - begin.tv_usec) / 1000.0;
+    time_total += time_spent;
+	printf("Time total = %f | time spent = %f\n", time_total, time_spent);
+
     fprintf(file, "\n%fms;", time_spent);
     fclose(file);   
     free(nome_arquivo);
@@ -75,7 +79,7 @@ int main(int argc, char *argv[])
 
     int n1, m1, n2, m2, i, j, k;
     FILE *file1, *file2, *file3;
-
+    printf("----------------------\n");
     // Verificando se os nomes dos 2 arquivos foram passados na linha de comando
     if (argc < 3)
     {
@@ -111,8 +115,8 @@ int main(int argc, char *argv[])
     // Fechando o arquivo
     fclose(file1);
 
-    printf("\nMatriz 1:\n\n");
-    imprimir_matriz(matriz_1, n1, m1);
+    // printf("\nMatriz 1:\n\n");
+    // imprimir_matriz(matriz_1, n1, m1);
 
     /* Lendo Matriz 2 */
 
@@ -142,8 +146,8 @@ int main(int argc, char *argv[])
     // Fechando o arquivo
     fclose(file2);
 
-    printf("\nMatriz 2:\n\n");
-    imprimir_matriz(matriz_2, n2, m2);
+    // printf("\nMatriz 2:\n\n");
+    // imprimir_matriz(matriz_2, n2, m2);
 
     // Verificando se a multiplicacao das matriz m1 e m2 eh possivel
     if (m1 != n2)
@@ -177,7 +181,7 @@ int main(int argc, char *argv[])
 
     pid_t pid;
     fflush(stdout);
-    printf("Processo PAI(PID=%d)\n", getpid());
+    // printf("Processo PAI(PID=%d)\n", getpid());
     
     
     // Tempo inicial de execucao da thread
@@ -192,7 +196,7 @@ int main(int argc, char *argv[])
         }
         else if(pid==0){
             fflush(stdout);
-            printf("Criou o filho #%d (PID=%d) cujo PAI(PID=%d)\n", i, getpid(), getppid());
+            // printf("Criou o filho #%d (PID=%d) cujo PAI(PID=%d)\n", i, getpid(), getppid());
             multiplica_matrizes((void *)(size_t)i);
         }
         else {
