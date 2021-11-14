@@ -205,5 +205,24 @@ int main(int argc, char *argv[])
 
     }
 
+    // Liberando espacos da memoria alocada dinamicamente
+    for (i = 0; i < col_m; i++)
+    {
+        free(matriz_resultado_global[i]);
+    }
+    free(matriz_resultado_global);
+ 
+    for (i = 0; i < m1; i++)
+    {
+        free(matriz_1[i]);
+    }
+    free(matriz_1);
+
+    for (i = 0; i < m2; i++)
+    {
+        free(matriz_2[i]);
+    }
+    free(matriz_2);
+
     return 0;
 }

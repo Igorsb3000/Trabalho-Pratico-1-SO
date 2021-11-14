@@ -227,7 +227,19 @@ int main(int argc, char *argv[])
 		free(matriz_resultado_global[i]);
 	}
 	free(matriz_resultado_global);
-	free(nome_arquivo);
+
+	for (i = 0; i < m1; i++)
+	{
+		free(matriz_1[i]);
+	}
+	free(matriz_1);
+
+	for (i = 0; i < m2; i++)
+	{
+		free(matriz_2[i]);
+	}
+	free(matriz_2);
+
 
 	return 0;
 }
