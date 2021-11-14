@@ -44,16 +44,17 @@ int main(int argc, char *argv[]){
 	fclose(file1); 
 
 
-	printf("\nMatriz 1:\n\n");
-	for(i=0; i<n1; i++){
-		for(j=0; j<m1; j++){
-			printf("%d;", matriz_1[i][j]);
-		}
-		printf("\n");
-	}
+	// printf("\nMatriz 1:\n\n");
+	// for(i=0; i<n1; i++){
+	// 	for(j=0; j<m1; j++){
+	// 		printf("%d;", matriz_1[i][j]);
+	// 	}
+	// 	printf("\n");
+	// }
 
 
 
+	/* Lendo Matriz 2 */
 	/* Lendo Matriz 2 */
 
 	// Abrindo os arquivos para leitura das matrizes
@@ -76,13 +77,13 @@ int main(int argc, char *argv[]){
 	fclose(file2); 
 
 
-	printf("\nMatriz 2:\n\n");
-	for(i=0; i<n2; i++){
-		for(j=0; j<m2; j++){
-			printf("%d;", matriz_2[i][j]);
-		}
-		printf("\n");
-	}
+	// printf("\nMatriz 2:\n\n");
+	// for(i=0; i<n2; i++){
+	// 	for(j=0; j<m2; j++){
+	// 		printf("%d;", matriz_2[i][j]);
+	// 	}
+	// 	printf("\n");
+	// }
 
 	// Verificando se a multiplicacao das matriz m1 e m2 eh possivel
 	if(m1 != n2){
@@ -98,7 +99,7 @@ int main(int argc, char *argv[]){
 
 	int matriz_resultado[lin_m][col_m];
 
-	printf("\nMontando matriz resultado...\n");
+	// printf("\nMontando matriz resultado...\n");
 	// Tempo inicial de execucao da thread
     gettimeofday(&begin, NULL);
 
@@ -117,13 +118,13 @@ int main(int argc, char *argv[]){
     time_spent += (end.tv_usec - begin.tv_usec) / 1000.0;
 	printf("\nTempo gasto para execução foi de %f ms\n", time_spent);
 
-	printf("\nMatriz Resultado:\n\n");
-	for(i=0; i<lin_m; i++){
-		for(j=0; j<col_m; j++){
-			printf("%d;", matriz_resultado[i][j]);
-		}
-		printf("\n");
-	}
+	// printf("\nMatriz Resultado:\n\n");
+	// for(i=0; i<lin_m; i++){
+	// 	for(j=0; j<col_m; j++){
+	// 		printf("%d;", matriz_resultado[i][j]);
+	// 	}
+	// 	printf("\n");
+	// }
 
 
 	/* Escrevendo o Resultado da Multiplicacao */
