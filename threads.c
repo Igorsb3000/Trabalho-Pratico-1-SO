@@ -172,7 +172,6 @@ int main(int argc, char *argv[])
 	void *thread_return;
 	lin_m = n1; // Quantidade de linhas da matriz m1
 	col_m = m2; // Quantidade de colunas da matriz m2
-	int matriz_resultado[lin_m][col_m];
 
 	// Alocando dinamicamente a matriz global
 	matriz_resultado_global = malloc(lin_m * sizeof(int *));
