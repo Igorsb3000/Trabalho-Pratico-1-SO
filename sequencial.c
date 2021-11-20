@@ -114,7 +114,7 @@ int main(int argc, char *argv[]){
     gettimeofday(&end, NULL);
     time_spent = (end.tv_sec - begin.tv_sec) * 1000.0;
     time_spent += (end.tv_usec - begin.tv_usec) / 1000.0;
-	printf("\nTempo gasto para execução foi de %f ms\n", time_spent);
+	printf("\nTime spend sequencial =  %f ms\n", time_spent);
 
 
 	/* Escrevendo o Resultado da Multiplicacao */

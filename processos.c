@@ -16,31 +16,15 @@
 int numero_threads, lin_m, col_m, lin_aux=0, col_aux=0, P;   
 int **matriz_resultado_global, **matriz_1, **matriz_2;
 struct timeval begin, end;
-double time_spent;
-double time_total = 0.0;
 
-
-// Funcao para imprimir matriz global que foi alocada dinamicamente
-void* imprimir_matriz(int **matriz, int lin, int col){
-    printf("\n");
-
-    for(int i=0; i<lin; i++){
-        for(int j=0; j<col; j++){
-            printf("%d;", matriz[i][j]);
-        }
-        printf("\n");
-    }
-}
 
 // Funcao para multiplicar P elementos da matriz resultado para cada Thread
 void* multiplica_matrizes(void* i){
     FILE *file;
+    double time_spent;
     char *nome_arquivo = malloc(30 * sizeof(char));
-    sprintf(nome_arquivo, "resultado_processo_%d.csv", (int)(size_t)i);
-    file = fopen(nome_arquivo, "w");
-    fprintf(file, "%d;%d;\n", lin_m, col_m);
-
     int linha, coluna, e, indice = (int)(size_t)i;
+
     for(e=indice*P; e<((indice+1)*P); e++){
         int total_elementos = (lin_m*col_m);
 
@@ -52,7 +36,6 @@ void* multiplica_matrizes(void* i){
             for(int k=0; k<col_aux; k++){  
                 matriz_resultado_global[linha][coluna] += matriz_1[linha][k] * matriz_2[k][coluna];
             }
-            fprintf(file, "%d;", matriz_resultado_global[linha][coluna]);
 
         }else{
             // Não tem mais elementos para calcular
@@ -64,12 +47,29 @@ void* multiplica_matrizes(void* i){
     gettimeofday(&end, NULL);
     time_spent = (end.tv_sec - begin.tv_sec) * 1000.0;
     time_spent += (end.tv_usec - begin.tv_usec) / 1000.0;
-    time_total += time_spent;
-	printf("Time total = %f | time spent = %f\n", time_total, time_spent);
+    
+
+    sprintf(nome_arquivo, "resultado_processo_%d.csv", (int)(size_t)i);
+    file = fopen(nome_arquivo, "w");
+    fprintf(file, "%d;%d;\n", lin_m, col_m);
+
+    for (e = indice * P; e < ((indice + 1) * P); e++)
+    {
+        int total_elementos = (lin_m * col_m);
+
+        if (e < total_elementos)
+        {
+            linha = e / lin_m;
+            coluna = e % col_m;
+            fprintf(file, "%d;", matriz_resultado_global[linha][coluna]);
+        }
+    }
 
     fprintf(file, "\n%fms;", time_spent);
     fclose(file);   
     free(nome_arquivo);
+
+    printf("Time spend processo#%d = %f ms\n", (int)(size_t)i, time_spent);
     exit(0);
 }
 
@@ -79,7 +79,7 @@ int main(int argc, char *argv[])
 
     int n1, m1, n2, m2, i, j, k;
     FILE *file1, *file2, *file3;
-    printf("----------------------\n");
+
     // Verificando se os nomes dos 2 arquivos foram passados na linha de comando
     if (argc < 3)
     {
@@ -115,8 +115,6 @@ int main(int argc, char *argv[])
     // Fechando o arquivo
     fclose(file1);
 
-    // printf("\nMatriz 1:\n\n");
-    // imprimir_matriz(matriz_1, n1, m1);
 
     /* Lendo Matriz 2 */
 
@@ -146,8 +144,6 @@ int main(int argc, char *argv[])
     // Fechando o arquivo
     fclose(file2);
 
-    // printf("\nMatriz 2:\n\n");
-    // imprimir_matriz(matriz_2, n2, m2);
 
     // Verificando se a multiplicacao das matriz m1 e m2 eh possivel
     if (m1 != n2)
@@ -180,13 +176,11 @@ int main(int argc, char *argv[])
     }
 
     pid_t pid;
-    fflush(stdout);
-    // printf("Processo PAI(PID=%d)\n", getpid());
-    
     
     // Tempo inicial de execucao da thread
     gettimeofday(&begin, NULL);
-    for(i=0; i<quantidade_processos; i++){
+
+    for(i = 0; i < quantidade_processos; i++){
         pid=fork();
 
         if(pid < 0){
@@ -195,15 +189,16 @@ int main(int argc, char *argv[])
             
         }
         else if(pid==0){
-            fflush(stdout);
-            // printf("Criou o filho #%d (PID=%d) cujo PAI(PID=%d)\n", i, getpid(), getppid());
             multiplica_matrizes((void *)(size_t)i);
-        }
-        else {
-            wait(NULL);
         }
 
     }
+
+    // Esperando todos os FILHOS do processeo PAI
+    for(i = 0; i < quantidade_processos; i++){
+        wait(NULL);
+    }
+
 
     // Liberando espacos da memoria alocada dinamicamente
     for (i = 0; i < col_m; i++)
