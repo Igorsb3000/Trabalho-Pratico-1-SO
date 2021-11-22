@@ -18,6 +18,35 @@ int **matriz_resultado_global, **matriz_1, **matriz_2;
 struct timeval begin, end;
 
 
+int **AlocaMatriz(int linhas, int colunas){
+	int i, **matriz;
+
+	matriz = (int **)malloc(sizeof(int *) * linhas);
+	if(matriz == NULL){
+		printf("Memoria insuficiente para alocar matriz\n");
+		exit(-1);
+	}
+
+	for(i=0; i<linhas; i++){
+		matriz[i] = (int *)malloc(sizeof(int) * linhas);
+
+		if(matriz[i] == NULL){
+		printf("Memoria insuficiente para alocar coluna da matriz\n");
+		exit(-1);
+		}
+	}
+	return matriz;
+}
+
+void DesalocarMatriz(int **matriz, int linhas){
+	int i=0;
+
+	for(i=0; i<linhas; i++){
+		free(matriz[i]);
+	}
+	free(matriz);
+}
+
 // Funcao para multiplicar P elementos da matriz resultado para cada Thread
 void* multiplica_matrizes(void* i){
     FILE *file;
@@ -80,6 +109,8 @@ int main(int argc, char *argv[])
     int n1, m1, n2, m2, i, j, k;
     FILE *file1, *file2, *file3;
 
+    printf("---------------------------\n");
+
     // Verificando se os nomes dos 2 arquivos foram passados na linha de comando
     if (argc < 3)
     {
@@ -99,11 +130,7 @@ int main(int argc, char *argv[])
 
     // Obtendo as dimensoes da matriz
     fscanf(file1, "%d;%d;", &n1, &m1);
-    matriz_1 = malloc(n1 * sizeof(int *));
-    for (i = 0; i < m1; i++)
-    {
-        matriz_1[i] = malloc(m1 * sizeof(int));
-    }
+    matriz_1 = AlocaMatriz(n1, m1);
 
     for (i = 0; i < n1; i++)
     {
@@ -128,11 +155,7 @@ int main(int argc, char *argv[])
 
     // Obtendo as dimensoes da matriz
     fscanf(file2, "%d;%d;", &n2, &m2);
-    matriz_2 = malloc(n2 * sizeof(int *));
-    for (i = 0; i < m2; i++)
-    {
-        matriz_2[i] = malloc(m2 * sizeof(int));
-    }
+    matriz_2 = AlocaMatriz(n2, m2);
 
     for (i = 0; i < n2; i++)
     {
@@ -163,11 +186,7 @@ int main(int argc, char *argv[])
     col_m = m2; // Quantidade de colunas da matriz m2
 
     // Alocando dinamicamente a matriz global
-    matriz_resultado_global = malloc(lin_m * sizeof(int *));
-    for (i = 0; i < col_m; i++)
-    {
-        matriz_resultado_global[i] = malloc(col_m * sizeof(int));
-    }
+    matriz_resultado_global = AlocaMatriz(lin_m, col_m);
 
     // Fazendo o calculo da quantidade de processos necessarias
     int quantidade_processos = (lin_m * col_m) / P;
@@ -201,23 +220,9 @@ int main(int argc, char *argv[])
 
 
     // Liberando espacos da memoria alocada dinamicamente
-    for (i = 0; i < col_m; i++)
-    {
-        free(matriz_resultado_global[i]);
-    }
-    free(matriz_resultado_global);
- 
-    for (i = 0; i < m1; i++)
-    {
-        free(matriz_1[i]);
-    }
-    free(matriz_1);
-
-    for (i = 0; i < m2; i++)
-    {
-        free(matriz_2[i]);
-    }
-    free(matriz_2);
+    DesalocarMatriz(matriz_resultado_global, lin_m);
+    DesalocarMatriz(matriz_1, n1);
+    DesalocarMatriz(matriz_2, n2);
 
     return 0;
 }

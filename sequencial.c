@@ -11,6 +11,37 @@
 
 int i, j, **matriz_1, **matriz_2, **matriz_resultado;
 
+
+
+int **AlocaMatriz(int linhas, int colunas){
+	int i, **matriz;
+
+	matriz = (int **)malloc(sizeof(int *) * linhas);
+	if(matriz == NULL){
+		printf("Memoria insuficiente para alocar matriz\n");
+		exit(-1);
+	}
+
+	for(i=0; i<linhas; i++){
+		matriz[i] = (int *)malloc(sizeof(int) * linhas);
+
+		if(matriz[i] == NULL){
+		printf("Memoria insuficiente para alocar coluna da matriz\n");
+		exit(-1);
+		}
+	}
+	return matriz;
+}
+
+void DesalocarMatriz(int **matriz, int linhas){
+	int i=0;
+
+	for(i=0; i<linhas; i++){
+		free(matriz[i]);
+	}
+	free(matriz);
+}
+
 int main(int argc, char *argv[]){
 	struct timeval begin, end;
 	double time_spent;
@@ -35,12 +66,8 @@ int main(int argc, char *argv[]){
 	
 	// Obtendo as dimensoes da matriz
 	fscanf(file1, "%d;%d;", &n1, &m1);
-	//int matriz_1[n1][m1];
-	matriz_1 = malloc(n1 * sizeof(int *));
-    for (i = 0; i < m1; i++)
-    {
-        matriz_1[i] = malloc(m1 * sizeof(int));
-    }
+
+	matriz_1 = AlocaMatriz(n1, m1);
 
 	for(i=0; i<n1; i++){
 		for(j=0; j<m1; j++){
@@ -63,11 +90,7 @@ int main(int argc, char *argv[]){
 	// Obtendo as dimensoes da matriz
 	fscanf(file2, "%d;%d;", &n2, &m2);
 	//int matriz_2[n2][m2];
-	matriz_2 = malloc(n2 * sizeof(int *));
-    for (i = 0; i < m2; i++)
-    {
-        matriz_2[i] = malloc(m2 * sizeof(int));
-    }
+	matriz_2 = AlocaMatriz(n2, m2);
 
 	for(i=0; i<n2; i++){
 		for(j=0; j<m2; j++){
@@ -92,11 +115,7 @@ int main(int argc, char *argv[]){
 
 	//int matriz_resultado[lin_m][col_m];
 
-	matriz_resultado = malloc(lin_m * sizeof(int *));
-    for (i = 0; i < col_m; i++)
-    {
-        matriz_resultado[i] = malloc(col_m * sizeof(int));
-    }
+	matriz_resultado = AlocaMatriz(lin_m, col_m);
 
 	// Tempo inicial de execucao da thread
     gettimeofday(&begin, NULL);
@@ -133,18 +152,9 @@ int main(int argc, char *argv[]){
 	fclose(file3); 
 
 	// Liberando espacos da memoria alocada dinamicamente
-	for (i = 0; i < m1; i++)
-	{
-		free(matriz_1[i]);
-	}
-	free(matriz_1);
-
-	for (i = 0; i < m2; i++)
-	{
-		free(matriz_2[i]);
-	}
-	free(matriz_2);
-
+	DesalocarMatriz(matriz_1, n1);
+	DesalocarMatriz(matriz_2, n2);
+	DesalocarMatriz(matriz_resultado, lin_m);
 
 	return 0;
 }
